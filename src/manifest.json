@@ -1,31 +1,25 @@
 {
-    "name": "Checkbox Checker for Jenkins on Marfeel",
+    "name": "Checkbox Checker",
     "version": "1.0.6",
     "icons": {
         "128": "images/bender128.png",
         "48": "images/bender48.png",
         "32": "images/bender32.png"
     },
-    "description": "Selects automatically all the checkboxes from Jenkins on Marfeel",
+    "description": "Selects automatically all the checkboxes from a set of URL's",
     "content_scripts": [
         {
-            "matches": ["*://bobthebuilder.marfeel.com/*MarfeelXPShuttleGIT*", "*://bobthebuilder.marfeel.com/*AliceTenantsShuttleGIT*",
-                        "*://bobthebuilder.marfeel.com/*ProTenantsShuttleGit*"],
+            "matches": ["*://*/*"],
             "js": ["js/background.js"]
-        },
-        {
-            "matches": ["*://localhost.marfeel.com/*"],
-            "css": ["css/ads.css"],
-            "js": ["js/ads.js"]
         }
     ],
     "browser_action": {
-        "default_title": "test",
         "default_icon": "images/bender128.png"
     },
     "permissions": [
         "tabs",
         "activeTab"
     ],
+    "web_accessible_resources": ["json/config.json"],
     "manifest_version": 3
 }
