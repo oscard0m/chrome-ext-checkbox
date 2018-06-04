@@ -21,18 +21,28 @@ const getConfigFile = (fileURL, successCallback, errorCallback) => {
 	errorCallback && request.catch(errorCallback);
 };
 
+const doActions = (urls, selectOption) => {
+	if (urls.find((url) => window.location.href.search(url) >= 0)) {
+		toggle();
+		setAsDefaultEnv(selectOption);
+	}
+};
+
 const parseResponse = (response) => {
 	const contentType = response.headers.get('content-type');
 
 	if (contentType && contentType.indexOf('application/json') !== -1) {
 		response.json().then(jsonConfig => {
-			const URLS = jsonConfig.urls;
-			const SELECT_OPTION = jsonConfig.defaultOption;
+			for (const key of Object.keys(jsonConfig)) {
+				if (key !== 'urls' && key !== 'defaultOption') {
+					const currConfig = jsonConfig[key];
 
-			if (URLS.find((url) => window.location.href.search(url) >= 0)) {
-				toggle();
-				setAsDefaultEnv(SELECT_OPTION);
+					doActions(currConfig.urls, currConfig.defaultOption);
+				} else {
+					doActions(jsonConfig.urls, jsonConfig.defaultOption);
+				}
 			}
+
 		});
 	}
 };
