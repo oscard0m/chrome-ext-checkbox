@@ -1,7 +1,9 @@
+const configKeys = ['urls', 'defaultOption'];
+
 const toggle = () => {
 	const checkboxes = document.querySelectorAll('input[type=\'checkbox\']');
 
-	checkboxes.forEach(checkbox => checkbox.checked = true);//eslint-disable-line no-return-assign
+	checkboxes.forEach(checkbox => { checkbox.checked = true; });
 };
 
 const setAsDefaultEnv = (env) => {
@@ -32,7 +34,7 @@ const parseResponse = (response) => {
 	if (contentType && contentType.indexOf('application/json') !== -1) {
 		response.json().then(jsonConfig => {
 			for (const key of Object.keys(jsonConfig)) {
-				const isDefaultOption = ['urls', 'defaultOption'].some(key);
+				const isDefaultOption = configKeys.some(arrElem => arrElem === key);
 				const { urls, selectOption } = isDefaultOption ? jsonConfig : jsonConfig[key];
 
 				doActions(urls, selectOption);
