@@ -1,42 +1,49 @@
+const configKeys = ['urls', 'defaultOption'];
+
 const toggle = () => {
-  const checkboxes = document.querySelectorAll("input[type='checkbox']");
-  checkboxes.forEach(checkbox => checkbox.checked = true)
+	const checkboxes = document.querySelectorAll('input[type=\'checkbox\']');
+
+	checkboxes.forEach(checkbox => { checkbox.checked = true; });
 };
 
 const setAsDefaultEnv = (env) => {
 	const proOption = document.querySelector(`option[value='${env}']`);
-	if(proOption) proOption.selected = true;
+
+	if (proOption) {
+		proOption.selected = true;
+	}
 };
 
-const ajax = (url, successCallback, errorCallback, timeout, xml) => {
-    const request = new XMLHttpRequest();
-    request.timeout = timeout || 10000;
-    request.open("GET", url);
+const getConfigFile = (fileURL, successCallback, errorCallback) => {
+	const request = fetch(fileURL);
 
-    setReadyStateChange(request, successCallback, errorCallback, xml);
-    request.send();
+	successCallback && request.then(successCallback);
+	errorCallback && request.catch(errorCallback);
 };
 
-const setReadyStateChange = (request, successCallback, errorCallback, xml) => {
-    request.onreadystatechange = () => {
-        if (request.readyState === 4) {
-            if (request.status === 200) {
-                successCallback && successCallback(!xml ? request.responseText : request.responseXML);
-            } else {
-                errorCallback && errorCallback(request);
-            }
-        }
-    };
+const doActions = (urls, selectOption) => {
+	if (urls.find(url => window.location.href.search(url) >= 0)) {
+		toggle();
+		selectOption && setAsDefaultEnv(selectOption);
+	}
 };
 
-ajax(chrome.extension.getURL("/json/config.json"), function(response) {
-  const jsonConfig = JSON.parse(response);
-  const URLS = jsonConfig.urls;
-  const SELECT_OPTION = jsonConfig.defaultOption;
-  if(URLS.find((url) => window.location.href.search(url) >= 0)) {
-    toggle();
-    setAsDefaultEnv(SELECT_OPTION);
-  }
-});
+const parseResponse = (response) => {
+	const contentType = response.headers.get('content-type');
+
+	if (contentType && contentType.indexOf('application/json') !== -1) {
+		response.json().then(jsonConfig => {
+			for (const key of Object.keys(jsonConfig)) {
+				const isDefaultOption = configKeys.some(arrElem => arrElem === key);
+				const { urls, selectOption } = isDefaultOption ? jsonConfig : jsonConfig[key];
+
+				doActions(urls, selectOption);
+			}
+
+		});
+	}
+};
+
+getConfigFile(chrome.runtime.getURL('/json/config.json'), parseResponse);
 
 
